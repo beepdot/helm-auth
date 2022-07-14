@@ -93,9 +93,7 @@ customLivenessProbe: {}
 customReadinessProbe: {}
 ## @param podAnnotations Kong pod annotations
 ##
-podAnnotations:
-    helm.sh/hook: post-install, pre-upgrade
-    helm.sh/hook-weight: "2"
+podAnnotations: {}
 ## Service parameters
 ##
 service:
@@ -222,7 +220,6 @@ migration:
   annotations:
     helm.sh/hook: post-install, pre-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
-    helm.sh/hook-weight: "1"
   ## @param migration.podLabels Additional pod labels
   ## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
