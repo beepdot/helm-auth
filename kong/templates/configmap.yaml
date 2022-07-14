@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "common.names.fullname" . }}-envvars
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  KONG_ADMIN_LISTEN: "{{ .Values.adminListen.ip }}:{{ .Values.adminListen.port }}"
+  KONG_DATABASE: {{ .Values.database | quote }}
+  KONG_LOG_LEVEL: {{ .Values.logLevel | quote }}
+  KONG_LUA_SOCKET_POOL_SIZE: {{ .Values.luaSockerPoolSize | quote }}
+  KONG_MEM_CACHE_SIZE: {{ .Values.memCacheSize | quote }}
+  KONG_NGINX_HTTP_LOG_FORMAT: {{ .Values.logFormat | quote }}
+  KONG_NGINX_WORKER_PROCESSES: {{ .Values.workerCount | quote }}
+  KONG_PROXY_ACCESS_LOG: {{ .Values.accessLog | quote }}
+  KONG_RATELIMIT_CACHE_SIZE: {{ .Values.rateCacheSize | quote }}
+  KONG_TRUSTED_IPS: {{ .Values.trustedIPs | quote }}
+  KONG_UPSTREAM_KEEPALIVE: {{ .Values.upstreamKeepAlive | quote }}
+  KONG_PG_DATABASE: {{ .Values.postgresql.auth.database | quote }}
+  KONG_PG_HOST: {{ include "kong.postgresql.host" . }}
+  KONG_PG_USER: {{ include "kong.postgresql.user" . }}

@@ -1,0 +1,9 @@
+dependencies:
+- name: postgresql
+  repository: https://keshavprasadms.github.io/helm-db
+  version: 11.0.0
+- name: common
+  repository: https://keshavprasadms.github.io/helm-common
+  version: 1.0.0
+digest: sha256:a702468571a7fe5556fa8c4a175ba2fa7404a6dd1e3995ec0bd96b84976dd9c7
+generated: "2022-07-15T00:31:15.231375+05:30"

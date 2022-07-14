@@ -1,82 +1,284 @@
-# Default values for kong.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
 
-replicaCount: 1
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
 
+## @section KONG parameters
+
+## @param image.registry KONG image registry
+## @param image.repository KONG image repository
+## @param image.tag KONG image tag (immutable tags are recommended)
+## @param image.pullPolicy KONG image pull policy
+## @param image.pullSecrets Specify docker-registry secret names as an array
+##
 image:
-  repository: nginx
+  registry: docker.io
+  repository: keshavprasad/kong
+  tag: 0.14.1
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## E.g.:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
 
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
-podAnnotations: {}
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
+## KONG container port
+## @param containerPorts.http Apache server HTTP container port
+## @param containerPorts.https Apache server HTTPS container port
+##
+containerPorts:
+  http: 8000
+  admin: 8001
+## KONG containers' liveness probe.
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
+## @param livenessProbe.enabled Enable liveness probe
+## @param livenessProbe.path Path to access on the HTTP server
+## @param livenessProbe.port Port for livenessProbe
+## @param livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+## @param livenessProbe.periodSeconds Period seconds for livenessProbe
+## @param livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+## @param livenessProbe.failureThreshold Failure threshold for livenessProbe
+## @param livenessProbe.successThreshold Success threshold for livenessProbe
+##
+livenessProbe:
+  enabled: true
+  path: "/status"
+  port: admin
+  initialDelaySeconds: 30
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
+## @param readinessProbe.enabled Enable readiness probe
+## @param readinessProbe.path Path to access on the HTTP server
+## @param readinessProbe.port Port for readinessProbe
+## @param readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+## @param readinessProbe.periodSeconds Period seconds for readinessProbe
+## @param readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+## @param readinessProbe.failureThreshold Failure threshold for readinessProbe
+## @param readinessProbe.successThreshold Success threshold for readinessProbe
+##
+readinessProbe:
+  enabled: true
+  path: "/status"
+  port: admin
+  initialDelaySeconds: 30
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
+## @param customLivenessProbe Custom liveness probe for the Web component
+##
+customLivenessProbe: {}
+## @param customReadinessProbe Custom rediness probe for the Web component
+##
+customReadinessProbe: {}
+## @param podAnnotations Kong pod annotations
+##
+podAnnotations:
+    helm.sh/hook: post-install, pre-upgrade
+    helm.sh/hook-weight: "2"
+## Service parameters
+##
 service:
+  ## @param service.ports.http Kong http port
+  ## @param service.ports.admin Kong admin port
+  ##
+  ports: 
+    http: 8000
+    admin: 8001
+  ## @param service.type Kubernetes Service type
+  ##
   type: ClusterIP
-  port: 80
-
-ingress:
-  enabled: false
-  className: ""
+  ## @param service.nodePorts.http NodePort for Kong http endpoint
+  ## @param service.nodePorts.admin NodePort for Kong admin endpoint
+  ##
+  nodePorts: 
+    http: ""
+    admin: ""
+  ## @param service.externalTrafficPolicy Enable client source IP preservation
+  ## ref https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  ##
+  externalTrafficPolicy: Cluster
+  ## @param service.annotations Annotations for Kibana service (evaluated as a template)
+  ## This can be used to set the LoadBalancer service type to internal only.
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#internal-load-balancer
+  ##
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  ## @param service.labels Extra labels for Kibana service
+  ##
+  labels: {}
+  ## @param service.loadBalancerIP loadBalancerIP if Kibana service type is `LoadBalancer`
+  ## ref: https://kubernetes.io/docs/user-guide/services/#type-loadbalancer
+  ##
+  loadBalancerIP: ""
+  ## @param service.extraPorts Extra ports to expose in the service (normally used with the `sidecar` value)
+  ##
+  extraPorts: []
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+## Admin listener parameters
+##
+adminListen:
+  ## @param adminListen.ip Kong admin listen ip
+  ##
+  ip: 0.0.0.0
+  ## @param adminListen.ip Kong admin listen port
+  ##
+  port: 8001
+## @param trustedIPs Kong trusted ips
+##
+trustedIPs: "0.0.0.0/0,::/0"
+## @param upstreamKeepAlive Kong upstream keep alive
+##
+upstreamKeepAlive: 200
+## @param database Kong database store
+##
+database: postgres
+## @param logLevel Kong log level
+##
+logLevel: info
+## @param accessLog Kong access log path and format
+##
+accessLog: logs/access.log nginx_public_ingress_log_format
+## @param luaSockerPoolSize Kong lua socket pool size
+##
+luaSockerPoolSize: 30
+## @param memCacheSize Kong mem cache size
+##
+memCacheSize: 256m
+## @param rateCacheSize Kong rate cache size
+##
+rateCacheSize: 256m
+## @param logFormat Kong log format
+##
+logFormat: nginx_public_ingress_log_format '$remote_addr - $remote_user [$time_local] "$request" $status $request_length $body_bytes_sent $request_time $upstream_response_time $pipe "$http_referer" "$http_user_agent" "$http_x_request_id" "$http_x_device_id" "$http_x_channel_id" "$http_x_app_id" "$http_x_app_ver" "$http_x_session_id"'
+## @param worketCount Kong nginx worker count
+##
+workerCount: auto
 
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+## @section Kong Migration job Parameters
 
-nodeSelector: {}
+migration:
+  ## In case you want to use a custom image for Kong migration, set this value
+  ## image:
+  ##   registry:
+  ##   repository:
+  ##   tag:
+  ##
+  ## @param migration.command Override default container command (useful when using custom images)
+  ##
+  command: ["kong"]
+  ## @param migration.args Override default container args (useful when using custom images)
+  ##
+  args: ["migrations", "up"]
+  ## @param migration.extraEnvVars Array containing extra env vars to configure the Kong migration job
+  ## For example:
+  ## extraEnvVars:
+  ##  - name: GF_DEFAULT_INSTANCE_NAME
+  ##    value: my-instance
+  ##
+  extraEnvVars: []
+  ## @param migration.extraEnvVarsCM ConfigMap containing extra env vars to configure the Kong migration job
+  ##
+  extraEnvVarsCM: ""
+  ## @param migration.extraEnvVarsSecret Secret containing extra env vars to configure the Kong migration job (in case of sensitive data)
+  ##
+  extraEnvVarsSecret: ""
+  ## @param migration.extraVolumeMounts Array of extra volume mounts to be added to the Kong Container (evaluated as template). Normally used with `extraVolumes`.
+  ##
+  extraVolumeMounts: []
+  ## Container resource requests and limits
+  ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
+  ## @param migration.resources.limits The resources limits for the container
+  ## @param migration.resources.requests The requested resources for the container
+  ##
+  resources:
+    limits: {}
+    requests: {}
+  ## @param migration.hostAliases Add deployment host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param migration.annotations [object] Add annotations to the job
+  ##
+  annotations:
+    helm.sh/hook: post-install, pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook-weight: "1"
+  ## @param migration.podLabels Additional pod labels
+  ## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param migration.podAnnotations Additional pod annotations
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
 
-tolerations: []
+## @section PostgreSQL Parameters
+##
 
-affinity: {}
+## PostgreSQL chart configuration
+## ref: https://github.com/bitnami/charts/blob/master/bitnami/postgresql/values.yaml
+## @param postgresql.enabled Switch to enable or disable the PostgreSQL helm chart
+## @param postgresql.auth.postgresPassword Password for the "postgres" admin user
+## @param postgresql.auth.username Name for a custom user to create
+## @param postgresql.auth.password Password for the custom user to create
+## @param postgresql.auth.database Name for a custom database to create
+## @param postgresql.auth.existingSecret Name of existing secret to use for PostgreSQL credentials
+## @param postgresql.auth.usePasswordFiles Mount credentials as a files instead of using an environment variable
+## @param postgresql.architecture PostgreSQL architecture (`standalone` or `replication`)
+##
+postgresql:
+  enabled: true
+  ## @param postgresql.image.registry PostgreSQL image registry
+  ## @param postgresql.image.repository PostgreSQL image repository
+  ## @param postgresql.image.tag PostgreSQL image tag (immutable tags are recommended)
+  ##
+  image:
+    registry: docker.io
+    repository: postgres
+    tag: 11
+  auth:
+    username: kong
+    password: ""
+    database: kong
+    postgresPassword: ""
+    existingSecret: ""
+    usePasswordFiles: false
+  architecture: standalone
+  ## External PostgreSQL configuration
+  ## All of these values are only used when postgresql.enabled is set to false
+  ## @param postgresql.external.host Database host
+  ## @param postgresql.external.port Database port number
+  ## @param postgresql.external.user Non-root username for Kong
+  ## @param postgresql.external.password Password for the non-root username for Kong
+  ## @param postgresql.external.database Kong database name
+  ## @param postgresql.external.existingSecret Name of an existing secret resource containing the database credentials
+  ## @param postgresql.external.existingSecretPasswordKey Name of an existing secret key containing the database credentials
+  ##
+  external:
+    host: ""
+    port: 5432
+    user: kong
+    password: ""
+    database: kong
+    existingSecret: ""
+    existingSecretPasswordKey: ""

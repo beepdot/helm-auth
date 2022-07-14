@@ -1,0 +1,76 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "common.names.fullname" . }}-migrate
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.migration.annotations "context" $ ) | nindent 4 }}
+spec:
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" . | nindent 8 }}
+        {{- if .Values.migration.podLabels }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.migration.podLabels "context" $) | nindent 8 }}
+        {{- end }}
+      {{- if .Values.migration.podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.migration.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- include "kong.imagePullSecrets" . | nindent 6 }}
+      restartPolicy: OnFailure
+      {{- if .Values.migration.hostAliases }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.migration.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: kong-migrate
+          image: {{ template "kong.migration.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.migration.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.migration.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.migration.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.migration.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: KONG_DATABASE
+              value: {{ .Values.database | quote }}
+            {{- if (eq .Values.database "postgres") }}
+            - name: KONG_PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kong.postgresql.secretName" . }}
+                  key: {{ include "kong.postgresql.databaseSecretKey" . }}
+            - name: KONG_PG_HOST
+              value: {{ include "kong.postgresql.host" . }}
+            - name: KONG_PG_PORT
+              value: {{ include "kong.postgresql.port" . }}
+            - name: KONG_PG_USER
+              value: {{ include "kong.postgresql.user" . }}
+            {{- end }}
+            {{- if .Values.migration.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.migration.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          {{- if or .Values.migration.extraEnvVarsCM .Values.migration.extraEnvVarsSecret }}
+          envFrom:
+            {{- if .Values.migration.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ .Values.migration.extraEnvVarsCM }}
+            {{- end }}
+            {{- if .Values.migration.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ .Values.migration.extraEnvVarsSecret }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.migration.extraVolumeMounts }}
+          volumeMounts:
+            {{- include "common.tplvalues.render" (dict "value" .Values.migration.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.migration.resources }}
+          resources: {{- toYaml .Values.migration.resources | nindent 12 }}
+          {{- end }}
+      {{- if .Values.extraVolumes }}
+      volumes:
+      {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" $) | nindent 6 }}
+      {{- end }}
