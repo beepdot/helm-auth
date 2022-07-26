@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "kong-apis.fullname" . }}
+  labels:
+    {{- include "kong-apis.labels" . | nindent 4 }}
+  annotations:
+    {{ .Values.annotations | toYaml }}
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "kong-apis.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+          - name: kong-apis
+            mountPath: /kong_apis.json
+            subPath: "kong_apis.json"
+      volumes:
+      - name: kong-apis
+        configMap:
+          name: {{ include "kong-apis.fullname" . }}
+      restartPolicy: {{ .Values.restartPolicy }}

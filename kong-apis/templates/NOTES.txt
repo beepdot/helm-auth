@@ -1,0 +1,2 @@
+1. Check the logs of the pod using the below command:
+  kubectl --namespace {{ .Release.Namespace }} logs -l job-name=kong-apis

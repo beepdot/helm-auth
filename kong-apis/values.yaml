@@ -1,0 +1,40 @@
+# Default values for kong-apis.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: keshavprasad/kong-apis
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+restartPolicy: "OnFailure"
+
+annotations:
+  helm.sh/hook: post-install, post-upgrade, post-delete
+
+kong_apis:
+- name: echo
+  uris: "/echo"
+  upstream_url: "http://echo:4000"
+  strip_uri: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - name: statsd
+    config.host: "statsd-service"
+    config.port: "9125"
+  - name: acl
+    config.whitelist:
+    - echo
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "1000"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "100"
