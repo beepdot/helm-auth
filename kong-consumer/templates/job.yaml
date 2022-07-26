@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "kong-consumer.fullname" . }}
+  labels:
+    {{- include "kong-consumer.labels" . | nindent 4 }}
+  annotations:
+    {{ .Values.annotations | toYaml }}
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "kong-consumer.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+          - name: kong-consumer
+            mountPath: /kong_consumers.json
+            subPath: "kong_consumers.json"
+      volumes:
+      - name: kong-consumer
+        configMap:
+          name: {{ include "kong-consumer.fullname" . }}
+      restartPolicy: {{ .Values.restartPolicy }}

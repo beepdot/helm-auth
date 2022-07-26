@@ -1,0 +1,29 @@
+# Default values for kong-consumer.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: keshavprasad/kong-consumers
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+restartPolicy: "OnFailure"
+
+annotations:
+  helm.sh/hook: post-install, post-upgrade, post-delete
+
+kong_consumers:
+- username: api-admin
+  groups:
+  - echo
+  state: present
+- username: echo-user
+  groups:
+  - echo
+  state: present
