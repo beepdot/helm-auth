@@ -244,7 +244,7 @@ migration:
 ## @param postgresql.architecture PostgreSQL architecture (`standalone` or `replication`)
 ##
 postgresql:
-  enabled: true
+  enabled: false
   ## @param postgresql.image.registry PostgreSQL image registry
   ## @param postgresql.image.repository PostgreSQL image repository
   ## @param postgresql.image.tag PostgreSQL image tag (immutable tags are recommended)
@@ -272,10 +272,10 @@ postgresql:
   ## @param postgresql.external.existingSecretPasswordKey Name of an existing secret key containing the database credentials
   ##
   external:
-    host: ""
+    host: "postgresql"
     port: 5432
     user: kong
     password: ""
     database: kong
-    existingSecret: ""
-    existingSecretPasswordKey: ""
+    existingSecret: "postgresql"
+    existingSecretPasswordKey: "postgres-password"
