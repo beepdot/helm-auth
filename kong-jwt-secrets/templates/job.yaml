@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "kong-jwt-secrets.fullname" . }}
+  labels:
+    {{- include "kong-jwt-secrets.labels" . | nindent 4 }}
+  annotations:
+    {{ .Values.annotations | toYaml }}
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "kong-jwt-secrets.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "kong-jwt-secrets.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: CONSUMER_LIST
+            value: {{ join "," .Values.consumersToBePresentInSecrets }}
+      restartPolicy: {{ .Values.restartPolicy }}
