@@ -1,0 +1,4 @@
+FROM busybox:1.35.0-uclibc as busybox
+FROM keshavprasad/headerecho:v3
+COPY --from=busybox /bin /bin
+ENTRYPOINT ["/headerEcho"]

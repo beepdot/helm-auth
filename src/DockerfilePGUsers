@@ -1,0 +1,4 @@
+FROM python:3.10
+COPY  postgres-create-users.py /
+RUN pip install psycopg2
+CMD ["python", "postgres-create-users.py"]

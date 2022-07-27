@@ -1,0 +1,4 @@
+FROM python:2.7.18
+RUN pip install retry
+COPY kong-api-scripts /kong-api-scripts
+CMD ["python", "/kong-api-scripts/kong_apis.py", "/kong_apis.json", "--kong-admin-api-url=http://kong:8001"]
