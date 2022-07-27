@@ -16,7 +16,7 @@ spec:
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: {{ include "kong-jwt-secrets.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
           - name: CONSUMER_LIST

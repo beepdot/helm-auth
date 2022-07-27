@@ -24,6 +24,8 @@ rules:
   - secrets
   verbs:
   - create
+{{- else -}}
+{{ fail "Please set rbac.create to true in values.yaml as without this setting, this chart will not work" }}
 {{- end }}
 
 ---
@@ -40,4 +42,6 @@ subjects:
 - kind: ServiceAccount
   name: {{ include "kong-jwt-secrets.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
+{{- else -}}
+{{ fail "Please set rbac.create to true in values.yaml as without this setting, this chart will not work" }}
 {{- end }}

@@ -1,3 +1,9 @@
+## @section Global parameters
+## Global Docker image parameters
+## @param global.imageRegistry Global Docker image registry
+global:
+  imageRegistry: ""
+
 # Default values for kong-jwt-secrets.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
@@ -5,10 +11,10 @@
 replicaCount: 1
 
 image:
-  repository: keshavprasad/kong-jwt-secrets
+  repository: sunbird/kong-jwt-secrets
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "0.0.1"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -25,7 +31,7 @@ serviceAccount:
   automountServiceAccountToken: true
 
 rbac:
-  create: true
+  create: false
 
 consumersToBePresentInSecrets: 
  - echo-user

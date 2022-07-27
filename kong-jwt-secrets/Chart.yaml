@@ -22,3 +22,8 @@ version: 0.1.0
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "0.0.1"
+kubeVersion: "~1.24.x"
+dependencies:
+  - name: common
+    repository: https://keshavprasadms.github.io/helm-common/
+    version: 1.x.x
