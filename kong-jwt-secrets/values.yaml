@@ -11,7 +11,8 @@ global:
 replicaCount: 1
 
 image:
-  repository: sunbird/kong-jwt-secrets
+  registry: sunbird
+  repository: kong-jwt-secrets
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "0.0.1"
@@ -35,4 +36,4 @@ rbac:
 
 consumersToBePresentInSecrets: 
  - echo-user
- #- api-admin
+# - api-admin
