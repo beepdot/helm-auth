@@ -32,8 +32,8 @@ serviceAccount:
   automountServiceAccountToken: true
 
 rbac:
-  create: false
+  create: true
 
 consumersToBePresentInSecrets: 
  - echo-user
-# - api-admin
+ - api-admin
